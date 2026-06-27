@@ -1,10 +1,12 @@
-[gd_scene load_steps=14 format=3 uid="uid://c7d62axcv8pjx"]
+[gd_scene format=3 uid="uid://c7d62axcv8pjx"]
 
-[ext_resource type="Script" path="res://addons/Panel3D/3dpanel.gd" id="1_akynd"]
+[ext_resource type="Script" uid="uid://cb6a7hbfmnudr" path="res://addons/Panel3D/3dpanel.gd" id="1_akynd"]
 [ext_resource type="PackedScene" uid="uid://f6ve4iulmjhy" path="res://addons/Panel3D/examples/3d example.tscn" id="2_l7fxm"]
-[ext_resource type="Script" path="res://addons/Panel3D/examples/RayCast3D.gd" id="3_c5hel"]
+[ext_resource type="Script" uid="uid://bds0igku1fayj" path="res://addons/Panel3D/examples/RayCast3D.gd" id="3_c5hel"]
 [ext_resource type="PackedScene" uid="uid://cguqlvse0g2x3" path="res://addons/Panel3D/examples/Node2DExample.tscn" id="3_le6tb"]
-[ext_resource type="Script" path="res://addons/Panel3D/examples/Node3D.gd" id="5_wa7oo"]
+[ext_resource type="Script" uid="uid://cfgipruvdn3i7" path="res://addons/Panel3D/examples/Node3D.gd" id="5_wa7oo"]
+[ext_resource type="PackedScene" uid="uid://dwt1oew3m138p" path="res://addons/Panel3D/examples/responsive example.tscn" id="6_4h2sm"]
+[ext_resource type="Script" uid="uid://b5848qm7p3cbg" path="res://addons/Panel3D/examples/animation_player.gd" id="7_eqeag"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_40jv6"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -29,9 +31,9 @@ fractal_type = 0
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_mamxk"]
 width = 64
 height = 64
-seamless = true
-color_ramp = SubResource("Gradient_864qk")
 noise = SubResource("FastNoiseLite_45mly")
+color_ramp = SubResource("Gradient_864qk")
+seamless = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5i0f2"]
 albedo_texture = SubResource("NoiseTexture2D_mamxk")
@@ -43,50 +45,99 @@ texture_filter = 2
 material = SubResource("StandardMaterial3D_5i0f2")
 size = Vector3(1000, 1, 1000)
 
-[node name="example" type="Node3D"]
+[sub_resource type="Animation" id="Animation_4h2sm"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Panel3D3:viewport_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [Vector2i(1024, 1024)]
+}
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[sub_resource type="Animation" id="Animation_eqeag"]
+resource_name = "wiggle_panel"
+length = 2.0
+loop_mode = 1
+step = 0.0333333
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Panel3D3:viewport_size")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2i(50, 50), Vector2i(1024, 1024)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_6k265"]
+_data = {
+&"RESET": SubResource("Animation_4h2sm"),
+&"wiggle_panel": SubResource("Animation_eqeag")
+}
+
+[node name="example" type="Node3D" unique_id=1493566254]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1519527825]
 environment = SubResource("Environment_pvtyk")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=102703399]
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
 
-[node name="RayCast3D" type="RayCast3D" parent="."]
+[node name="RayCast3D" type="RayCast3D" parent="." unique_id=805095222]
 script = ExtResource("3_c5hel")
 
-[node name="Node3D" type="Node3D" parent="."]
+[node name="Node3D" type="Node3D" parent="." unique_id=63192787]
 script = ExtResource("5_wa7oo")
 
-[node name="Camera3D" type="Camera3D" parent="Node3D"]
+[node name="Camera3D" type="Camera3D" parent="Node3D" unique_id=862530036]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.12038)
 cull_mask = 524287
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1877218011]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 mesh = SubResource("BoxMesh_fyidn")
 
-[node name="Panel3D" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 2.13163e-14, 0, 9.31764e-22, -4.37114e-08, -1, -2.13163e-14, 1, -4.37114e-08, -0.3, 0, 0)
+[node name="Panel3D" type="StaticBody3D" parent="." unique_id=117510091]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
+script = ExtResource("1_akynd")
+_auto_load_ui = ExtResource("3_le6tb")
+metadata/grabbable = true
+metadata/_custom_type_script = "uid://cb6a7hbfmnudr"
+
+[node name="Panel3D2" type="StaticBody3D" parent="." unique_id=742914324]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
 script = ExtResource("1_akynd")
 _auto_load_ui = ExtResource("2_l7fxm")
-heightmap_deep_parallax = true
+metadata/grabbable = true
+metadata/_custom_type_script = "uid://cb6a7hbfmnudr"
 
-[node name="Panel3D2" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 2.13163e-14, 0, 9.31764e-22, -4.37114e-08, -1, -2.13163e-14, 1, -4.37114e-08, 0.3, 0, 0)
+[node name="Panel3D3" type="StaticBody3D" parent="." unique_id=686829937]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 script = ExtResource("1_akynd")
-_auto_load_ui = ExtResource("3_le6tb")
-shading_mode = 1
-heightmap_enabled = true
-heightmap_deep_parallax = true
+_auto_load_ui = ExtResource("6_4h2sm")
+metadata/grabbable = true
+metadata/_custom_type_script = "uid://cb6a7hbfmnudr"
 
-[node name="Panel3D3" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 2.13163e-14, 0, 9.31764e-22, -4.37114e-08, -1, -2.13163e-14, 1, -4.37114e-08, 0, 0.5, 0)
-script = ExtResource("1_akynd")
-_auto_load_ui = ExtResource("3_le6tb")
-shading_mode = 1
-heightmap_enabled = true
-heightmap_deep_parallax = true
-heightmap_min_layers = 1
-heightmap_max_layers = 10000
-heightmap_scale = 92.62
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=242013644]
+libraries/ = SubResource("AnimationLibrary_6k265")
+script = ExtResource("7_eqeag")
+
+[node name="LinkButton" type="LinkButton" parent="." unique_id=1116015028]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "please consider checking out my other work and/or donating! (this takes you to the barkvr github)"
+uri = "https://github.com/zodiepupper/barkvr"
