@@ -342,7 +342,8 @@ func laser_input(data:Dictionary):
 	
 	#event.window_id = data.index
 	# Sets the position of the event to the calculated mouse position in 2D space.
-	event.position = project_position_to_panel(data.position)
+	if "position" in event:
+		event.position = project_position_to_panel(data.position)
 	# if the button is pressed...
 	if "pressed" in data and data.pressed:
 		# and the event supports button_mask
@@ -354,7 +355,8 @@ func laser_input(data:Dictionary):
 			# calculate the event relative position and the velocity
 			event.relative = event.position - last_input_position
 			event.velocity = (event.position - last_input_position) * 40.0
-	event.position = round(event.position)
+	if "position" in event:
+		event.position = round(event.position)
 	# apply key modifiers if they're relevant to the type of input event
 	if event is InputEventWithModifiers:
 		event.ctrl_pressed = Input.is_key_pressed(KEY_CTRL)
@@ -365,8 +367,9 @@ func laser_input(data:Dictionary):
 	# Set event pressed value (should be false if not explicitly changed)
 	if data.has('pressed') and "pressed" in event:
 		event.pressed = data.pressed
-	# track last input position for calculating velocity and relative
-	last_input_position = event.position
+	if "position" in event:
+		# track last input position for calculating velocity and relative
+		last_input_position = event.position
 	
 	# Set the event to be handled locally (workaround for Godot 4.x bug)
 	#	The bug causes the viewport to not consistently receive input events

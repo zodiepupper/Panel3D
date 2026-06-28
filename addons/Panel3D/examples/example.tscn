@@ -2,11 +2,12 @@
 
 [ext_resource type="Script" uid="uid://cb6a7hbfmnudr" path="res://addons/Panel3D/3dpanel.gd" id="1_akynd"]
 [ext_resource type="PackedScene" uid="uid://f6ve4iulmjhy" path="res://addons/Panel3D/examples/3d example.tscn" id="2_l7fxm"]
-[ext_resource type="Script" uid="uid://bds0igku1fayj" path="res://addons/Panel3D/examples/RayCast3D.gd" id="3_c5hel"]
 [ext_resource type="PackedScene" uid="uid://cguqlvse0g2x3" path="res://addons/Panel3D/examples/Node2DExample.tscn" id="3_le6tb"]
 [ext_resource type="Script" uid="uid://cfgipruvdn3i7" path="res://addons/Panel3D/examples/Node3D.gd" id="5_wa7oo"]
 [ext_resource type="PackedScene" uid="uid://dwt1oew3m138p" path="res://addons/Panel3D/examples/responsive example.tscn" id="6_4h2sm"]
+[ext_resource type="Script" uid="uid://bmrxlfb75i37p" path="res://addons/Panel3D/interactionRay.gd" id="7_6k265"]
 [ext_resource type="Script" uid="uid://b5848qm7p3cbg" path="res://addons/Panel3D/examples/animation_player.gd" id="7_eqeag"]
+[ext_resource type="PackedScene" uid="uid://b5e67b4tlsvfs" path="res://addons/Panel3D/rayvis.tscn" id="8_6k265"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_40jv6"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -72,10 +73,10 @@ tracks/0/path = NodePath("Panel3D3:viewport_size")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 1),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.033333335, 0.06666667, 0.1, 0.13333334, 0.16666667, 0.2, 0.23333333, 0.26666668, 0.3, 0.33333334, 0.36666667, 0.4, 0.43333334, 0.46666667, 0.5, 0.53333336, 0.56666666, 0.6, 0.6333333, 0.6666667, 0.7, 0.73333335, 0.76666665, 0.8, 0.8333333, 0.8666667, 0.9, 0.93333334, 0.96666664, 1),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2i(50, 50), Vector2i(1024, 1024)]
+"values": [Vector2i(50, 900), Vector2i(52, 900), Vector2i(59, 901), Vector2i(69, 902), Vector2i(85, 904), Vector2i(104, 907), Vector2i(128, 910), Vector2i(156, 914), Vector2i(189, 918), Vector2i(225, 922), Vector2i(266, 928), Vector2i(312, 933), Vector2i(362, 940), Vector2i(416, 947), Vector2i(474, 954), Vector2i(537, 962), Vector2i(600, 970), Vector2i(658, 977), Vector2i(712, 984), Vector2i(762, 991), Vector2i(808, 996), Vector2i(849, 1002), Vector2i(885, 1006), Vector2i(918, 1010), Vector2i(946, 1014), Vector2i(970, 1017), Vector2i(989, 1020), Vector2i(1005, 1022), Vector2i(1015, 1023), Vector2i(1022, 1024), Vector2i(1024, 1024)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_6k265"]
@@ -93,15 +94,26 @@ environment = SubResource("Environment_pvtyk")
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
 
-[node name="RayCast3D" type="RayCast3D" parent="." unique_id=805095222]
-script = ExtResource("3_c5hel")
-
 [node name="Node3D" type="Node3D" parent="." unique_id=63192787]
 script = ExtResource("5_wa7oo")
 
 [node name="Camera3D" type="Camera3D" parent="Node3D" unique_id=862530036]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.12038)
 cull_mask = 524287
+
+[node name="InteractionRay" type="Node3D" parent="Node3D/Camera3D" unique_id=1624044708 node_paths=PackedStringArray("vis")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.12038)
+script = ExtResource("7_6k265")
+vis = NodePath("rayvis")
+forward_all_mouse_buttons = true
+smoothing_enabled = true
+smoothing_speed = 20.0
+private_ui_collision_layers = 1
+edit_ui_collision_layers = 1
+world_collision_layers = 1
+metadata/_custom_type_script = "uid://bmrxlfb75i37p"
+
+[node name="rayvis" parent="Node3D/Camera3D/InteractionRay" unique_id=1420301323 instance=ExtResource("8_6k265")]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1877218011]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
@@ -122,9 +134,10 @@ metadata/grabbable = true
 metadata/_custom_type_script = "uid://cb6a7hbfmnudr"
 
 [node name="Panel3D3" type="StaticBody3D" parent="." unique_id=686829937]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.24349636, 0.46901068, 0)
 script = ExtResource("1_akynd")
 _auto_load_ui = ExtResource("6_4h2sm")
+ANCHOR_POSITION = 6
 metadata/grabbable = true
 metadata/_custom_type_script = "uid://cb6a7hbfmnudr"
 

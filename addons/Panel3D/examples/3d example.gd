@@ -20,3 +20,8 @@ func _process(delta):
 	if down.button_pressed:
 		rigid_body_3d.apply_central_force( ( (camera_3d.basis*Vector3(0,0,5))*Vector3(1,0,1) ).normalized()*SPEED )
 
+func _ready() -> void:
+	get_viewport().set_process_input(false)
+
+func _input(event: InputEvent) -> void:
+	print(event)
