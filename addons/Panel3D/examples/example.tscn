@@ -101,10 +101,9 @@ script = ExtResource("5_wa7oo")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.12038)
 cull_mask = 524287
 
-[node name="InteractionRay" type="Node3D" parent="Node3D/Camera3D" unique_id=1624044708 node_paths=PackedStringArray("vis")]
+[node name="InteractionRay" type="Node3D" parent="Node3D/Camera3D" unique_id=1624044708]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.12038)
 script = ExtResource("7_6k265")
-vis = NodePath("rayvis")
 forward_all_mouse_buttons = true
 smoothing_enabled = true
 smoothing_speed = 20.0
@@ -143,14 +142,30 @@ metadata/_custom_type_script = "uid://cb6a7hbfmnudr"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=242013644]
 libraries/ = SubResource("AnimationLibrary_6k265")
+speed_scale = 0.5
 script = ExtResource("7_eqeag")
 
 [node name="LinkButton" type="LinkButton" parent="." unique_id=1116015028]
-anchors_preset = 12
+anchors_preset = 7
+anchor_left = 0.5
 anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -378.0
+offset_top = -23.0
+offset_right = 378.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_vertical = 8
+text = "please consider checking out my other work and/or donating! (this takes you to the barkvr github)"
+uri = "https://github.com/zodiepupper/barkvr"
+
+[node name="ColorRect" type="ColorRect" parent="LinkButton" unique_id=867544473]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
-grow_vertical = 0
-text = "please consider checking out my other work and/or donating! (this takes you to the barkvr github)"
-uri = "https://github.com/zodiepupper/barkvr"
+grow_vertical = 2
+color = Color(0, 0, 0, 0.4509804)

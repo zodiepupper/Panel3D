@@ -10,7 +10,7 @@ class_name InteractionRay
 extends Node3D
 
 ## holder for the rayvis node used for drawing the 3d cursor
-@export var vis: InteractionRayVisualizer
+@onready var vis: Node3D = $rayvis
 
 ## global position we want to put the rayvis cursor at
 var vispos := Vector3():
@@ -74,11 +74,21 @@ var last_plane_normal := Vector3()
 ## enables smoothing which applys a lerp to the
 ## target position to smooth out jittery controller
 ## movements when aiming at things
-@export var smoothing_enabled := false
+@export var smoothing_enabled := false:
+	get:
+		#var settings_instance : SettingsSingleton = SettingsSingleton.instance
+		#if "laser_smoothing" in settings_instance and smoothing_enabled != settings_instance.laser_smoothing:
+			#smoothing_enabled = settings_instance.laser_smoothing
+		return smoothing_enabled
 
 ## this controls the speed at which the lerp function
 ## interpolates toward the new target point
-@export var smoothing_speed := .3
+@export var smoothing_speed := .3:
+	get:
+		#var settings_instance : SettingsSingleton = SettingsSingleton.instance
+		#if "laser_smoothing_speed" in settings_instance and smoothing_speed != settings_instance.laser_smoothing_speed:
+			#smoothing_speed = settings_instance.laser_smoothing_speed
+		return smoothing_speed
 
 ## used to track previous position the raycast casted to
 ## so we can use it as the `from` in the lerpf for smoothing
@@ -335,6 +345,7 @@ func query_raycast() -> Dictionary:
 ## bother adding comments to this because it just doesn't deserve it. if you have
 ## Qs then ask zodie
 func interact() -> void:
+	_place_grabbed_nodes.call_deferred()
 	var tmpcol
 	var point : Vector3
 	if is_instance_valid(prevHover):
@@ -389,7 +400,6 @@ func interact() -> void:
 ## here we use the input method to capture any relevant input device stuff
 ## this is basically only for flat mode inputs
 func _input(event):
-	
 	# reset the using touch option until we know whether we are still using touch or not
 	using_touch = false
 	# if we are told to follow the mouse inputs and the user is actually touching the screen
@@ -398,22 +408,24 @@ func _input(event):
 		using_touch = true
 		# this updates the raycast target position so it aligns with where the user is touching
 		target_position = to_local(get_viewport().get_camera_3d().project_position(event.position,10000))
-	if forward_all_mouse_buttons:
-		if is_colliding() and "laser_input" in prevHover and event is InputEventMouseButton:
-			prevHover.laser_input({
-				'action':'custom',
-				'position':get_collision_point(),
-				'event':event,
-				'ray_origin': global_position,
-				'ray_direction': to_global(target_position),
-				'index': interaction_index
-			})
 	# if we get a gesture, we just wanna pass it on through to the laser_input compatible object
 	# this allows us to use nice features like pinch and drag as the engine gets them instead
 	# of shimming them in some weird way. 
 	if event is InputEventGesture:
 		if is_colliding() and prevHover is Panel3D:
 			prevHover.laser_input({
+				'action':'custom',
+				'position':get_collision_point(),
+				'event':event,
+				'ray_origin': global_position,
+				'ray_direction': to_global(target_position),
+				'index': -1
+			})
+	if forward_all_mouse_buttons:
+		if ((prevHover and "laser_input" in prevHover) or (prevPressed and "laser_input" in prevPressed)) and event is InputEventMouseButton:
+			pressed = event.is_pressed()
+			prevPressed = (prevPressed if prevPressed else prevHover)
+			(prevPressed if prevPressed else prevHover).laser_input({
 				'action':'custom',
 				'position':get_collision_point(),
 				'event':event,
@@ -490,6 +502,7 @@ func scrolldown():
 
 ## sends a left mouse click to the object we are currently interacting with
 func click():
+	#LocalGlobals.playerreleaseuifocus.emit()
 	if is_colliding():
 		var tmpcol = get_collider()
 		if tmpcol.has_method("laser_input"):
@@ -527,7 +540,7 @@ func fwd_event(event:InputEvent):
 				'event':event,
 				'ray_origin': global_position,
 				'ray_direction': to_global(target_position),
-				'index': interaction_index
+				'index': -1
 				})
 			#pressed = false
 	#prevPressed = null
@@ -539,6 +552,14 @@ class GrabbedNode3D:
 		var tmp := GrabbedNode3D.new()
 		tmp.target = new_target
 		return tmp
+	static func create_from_target_and_laser_positions(new_target: Node3D,\
+	current_laser_global_position: Vector3,\
+	current_laser_local_position: Vector3) -> GrabbedNode3D:
+		var tmp := GrabbedNode3D.new()
+		tmp.target = new_target
+		tmp.start_global_laser_position = current_laser_global_position
+		tmp.start_local_laser_position = current_laser_local_position
+		return tmp
 	## the node subject to this grab
 	##[br] the setter here automatically grabs the initial transform
 	var target : Node3D:
@@ -546,16 +567,34 @@ class GrabbedNode3D:
 			target = val
 			if is_instance_valid(val):
 				start_global_position = target.global_position
+				last_global_position = target.global_position
 				start_global_rotation = target.global_rotation
+	
+	## update the transforms of the target node, we do this here so it is self 
+	## managing
+	func move_target(goal_global_position: Vector3, goal_global_rotation: Vector3, delta: float):
+		if is_smooth_transform:
+			goal_global_position = lerp(last_global_position, goal_global_position, smooth_transform_speed * delta)
+		target.global_position = goal_global_position
+		last_global_position = target.global_position
+	
+	## is transform smoothing enabled?
+	var is_smooth_transform : bool = true
+	## smooth transform speed
+	var smooth_transform_speed : float = 100.0
+	## hold the previous global position for smoothing
+	var last_global_position : Vector3
 	## capture the initial position so we can revert if the user cancels
 	var start_global_position : Vector3
 	## capture the initial rotation so we can revert if the user cancels
 	var start_global_rotation : Vector3
-	## capture the initial 
 	## capture the collision position in global space as the interaction origin
-	var laser_position : Vector3
+	var start_global_laser_position : Vector3
+	## capture the collision position in local space as the interaction offset
+	var start_local_laser_position : Vector3
 	## the transform we want the target to have now
 	var goal_transform_3d : Transform3D = Transform3D()
+
 ## track all the nodes we have grabbed
 var grabbed_nodes : Dictionary[int, GrabbedNode3D] = {}
 
@@ -563,7 +602,12 @@ func grab(target:Node=null):
 	if !is_instance_valid(target) and is_colliding():
 		target = get_collider()
 	if target is Node3D:
-		grabbed_nodes[target.get_instance_id()] = GrabbedNode3D.create_from_target(target)
+		grabbed_nodes[target.get_instance_id()] = GrabbedNode3D.\
+		create_from_target_and_laser_positions(\
+			target,\
+			get_collision_point(),\
+			to_local( get_collision_point() )\
+			)
 		return
 	if target is Node2D:
 		pass
@@ -580,6 +624,6 @@ func release_grab(target:Node=null):
 
 ## move the grabbed nodes to the goal transform
 func _place_grabbed_nodes():
-	# TODO: generate the goal
+	# TODO: use goal and start offset to translate the grabbed nodes
 	for grabbed_node : GrabbedNode3D in grabbed_nodes.values():
-		pass
+		grabbed_node.move_target(to_global(grabbed_node.start_local_laser_position), Vector3(), get_process_delta_time())
